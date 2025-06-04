@@ -2,17 +2,19 @@ from stable_baselines3 import DQN
 import gymnasium as gym
 import numpy as np
 
-# Create or load a pre-trained policy
-env = gym.make("CartPole-v1")
-dqn_agent = DQN("MlpPolicy", env, verbose=0)
-# dqn_agent.learn(total_timesteps=10000)  # Uncomment if training from scratch
+vec_env = gym.make("CartPole-v1")
+dqn_agent = DQN("MlpPolicy", vec_env, verbose=0)
 
-def dqn_policy_decision(input_data: str) -> str:
-    """
-    Simulated decision-making based on DQN agent.
-    You would replace this with a custom environment and input mapping.
-    """
-    # Fake state from input_data, for demo purposes
-    observation = env.reset()
-    action, _ = dqn_agent.predict(observation, deterministic=True)
-    return f"action_{action}"
+# dqn_agent.learn(total_timesteps=10000)  # Optional training
+
+def dqn_policy_decision(input_text: str) -> str:
+    obs, _ = vec_env.reset()  # ✅ Correct unpacking
+
+    # 🔐 Ensure the observation is a NumPy array
+    if isinstance(obs, tuple):
+        obs = np.array(obs)
+    elif not isinstance(obs, np.ndarray):
+        obs = np.array(obs)
+
+    action, _ = dqn_agent.predict(obs, deterministic=True)
+    return f"Recommended action: {action}"
